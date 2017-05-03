@@ -1,23 +1,20 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, session, request
 import flask as fl
+from flask import Flask, render_template, session, request
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 from sqlalchemy import create_engine
 
-# Set this variable to "threading", "eventlet" or "gevent" to test the
-# different async modes, or leave it set to None for the application to choose
-# the best option based on installed packages.
+from .storage import engine
+from .. import config
+
 async_mode = None
 
-def init():
-    app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'secret!'
-    socketio = SocketIO(app, async_mode=async_mode)
+app = Flask(__name__)
+app.config = config
+socketio = SocketIO(app, async_mode=async_mode)
 
-    engine = create_engine('postgresql://localhost')
-
-init()
+engine = create_engine('postgresql://localhost')
 
 @app.route('/')
 def index():
