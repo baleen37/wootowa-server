@@ -1,33 +1,39 @@
 #!/usr/bin/env python
+import functools
+import socketio
+import flask_socketio as sio
 import flask as fl
 from flask import Flask, render_template, session, request
-from flask_socketio import SocketIO, emit, join_room, leave_room, \
-    close_room, rooms, disconnect
-from sqlalchemy import create_engine
+from .storage import init_engine, init_session
+from glb import config
 
-from .storage import engine
-from .. import config
-
-async_mode = None
+async_mode = 'threading'
 
 app = Flask(__name__)
-app.config = config
-socketio = SocketIO(app, async_mode=async_mode)
+app.config.from_object(config)
+socketio = sio.SocketIO(app)
+init_engine(app.config['RABBIT_DB'])
+init_session(app)
 
-engine = create_engine('postgresql://localhost')
+def login_required(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        return f(*args, **kwargs)
+    return wrapped
 
-@app.route('/')
-def index():
-    return render_template('index.html', async_mode=socketio.async_mode)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    return
 
 @socketio.on('connect')
 def connect():
-    clientId = 'asdf';
-    emit('id', clientId)
-    print('id: {}'.format(clientId))
+    client_id = request.sid
+    sio.emit('id', client_id)
+    print('client_id : {}'.format(client_id))
 
 @socketio.on('disconnect')
 def disconnect():
+    sio.disconnect()
     print('Client disconnected')
 
 @socketio.on('init')
@@ -49,7 +55,7 @@ def candidate():
 @socketio.on('readyToStream')
 def ready_to_stream(data):
     print('ready_to_stream {}'.format(data))
-    send('init')
+    print('rooms : {}'.format(sio.rooms()))
 
 @socketio.on('message')
 def message(message):
@@ -67,5 +73,3 @@ def leave():
 def default_error_handler(e):
     print(e)
 
-if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=3000, debug=True)
