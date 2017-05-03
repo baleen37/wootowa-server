@@ -1,5 +1,15 @@
 #!/usr/bin/env python
-from signal.app import socketio, app
+import sys
+from signalApp.app import socketio, app
+from signalApp.storage import init_db
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=3000)
+    if len(sys.argv) < 2:
+        print('python manage.py [runserver, initdb]')
+
+    command = sys.argv[1]
+    if command == 'runserver':
+        socketio.run(app, host='0.0.0.0', port=3000, debug=True)
+
+    if command == 'initdb':
+        init_db()

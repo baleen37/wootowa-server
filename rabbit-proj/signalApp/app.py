@@ -1,18 +1,25 @@
 #!/usr/bin/env python
 import functools
-import socketio
 import flask_socketio as sio
 import flask as fl
 from flask import Flask, render_template, session, request
-from .storage import init_engine, init_session
+from .storage import init_session, db_session
+from .helpers.socket import SocketManager
 from glb import config
 
-async_mode = 'threading'
+from .models import *
+from .activity import UserController
+from .storage import db_session 
+
+async_mode = None
 
 app = Flask(__name__)
 app.config.from_object(config)
-socketio = sio.SocketIO(app)
-init_engine(app.config['RABBIT_DB'])
+manager = SocketManager()
+socketio = sio.SocketIO(app, 
+                        client_manager=manager,
+                        ping_timeout=10,
+                        ping_interval=1)
 init_session(app)
 
 def login_required(f):
@@ -21,15 +28,25 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapped
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    return
+@app.route('/v1/user/sign_in', methods=['POST'])
+def sign_in():
+    print(request.POST)
+
+@app.route('/v1/user/sign_up', methods=['POST'])
+def sign_up():
+    user_dict = request.form.to_dict()
+    UserController().create_user(user_dict)
+
+    return fl.jsonify({
+        'msg': 'success'
+    })
 
 @socketio.on('connect')
 def connect():
     client_id = request.sid
     sio.emit('id', client_id)
     print('client_id : {}'.format(client_id))
+    print('auth_token : {}'.format(request.auth_token))
 
 @socketio.on('disconnect')
 def disconnect():
@@ -55,7 +72,14 @@ def candidate():
 @socketio.on('readyToStream')
 def ready_to_stream(data):
     print('ready_to_stream {}'.format(data))
-    print('rooms : {}'.format(sio.rooms()))
+    participants = list(manager.get_participants('/', None))
+
+    for p in participants:
+        if p != request.sid:
+            sio.emit('message', { 'from': p } )
+            print('from : {}'.format(p))
+
+    print('participants : {}'.format(participants))
 
 @socketio.on('message')
 def message(message):
@@ -69,7 +93,14 @@ def update():
 def leave():
     print('leave')
 
+@socketio.on('ping')
+def ping():
+    sio.emit('pong')
+
 @socketio.on_error_default
 def default_error_handler(e):
     print(e)
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
