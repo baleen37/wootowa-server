@@ -29,9 +29,15 @@ init_session(app)
 def requires_auth(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
-        header = request.headers.get('Authorization')
-        if header:
+        #header에 있거나
+        token = request.headers.get('Authorization')
+        if token:
             _, token = header.split()
+        else:
+            #params로 있거나
+            token = request.args.get('auth_token')
+
+        if token:
             resp = User.decode_auth_token(token)
 
             if isinstance(resp, Exception):
@@ -94,7 +100,9 @@ def sign_up():
     })), 201
 
 @socketio.on('connect')
+@requires_auth
 def connect():
+    print('connect user_id {}'.format(request.user_id))
     client_id = request.sid
     sio.emit('id', client_id)
     print('client_id : {}'.format(client_id))
