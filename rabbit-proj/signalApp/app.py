@@ -10,6 +10,7 @@ from glb import config
 from .models import *
 from .activity import UserController
 from .storage import db_session 
+from .helpers.apicode import ApiCode
 
 async_mode = None
 
@@ -30,7 +31,21 @@ def login_required(f):
 
 @app.route('/v1/user/sign_in', methods=['POST'])
 def sign_in():
-    print(request.POST)
+    user_dict = request.form.to_dict()
+    name = user_dict['name']
+    pw = user_dict['password']
+
+    result = UserController().verify_user(name, pw)
+    if result:
+        return fl.jsonify({
+            'msg': 'success',
+            'code': ApiCode.Success.value
+        })
+    else:
+        return fl.jsonify({
+            'msg': '실패',
+            'code': ApiCode.Failure.value
+        })
 
 @app.route('/v1/user/sign_up', methods=['POST'])
 def sign_up():
@@ -38,7 +53,8 @@ def sign_up():
     UserController().create_user(user_dict)
 
     return fl.jsonify({
-        'msg': 'success'
+        'msg': 'success',
+        'code': ApiCode.Success.value
     })
 
 @socketio.on('connect')
