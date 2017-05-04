@@ -1,8 +1,10 @@
 import hashlib
+import uuid
 import jwt
 import datetime
 from sqlalchemy import (
-    Column, Integer, String, Text, TypeDecorator, DateTime
+    Column, Integer, String, Text, TypeDecorator, DateTime,
+    JSON
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates
@@ -16,7 +18,7 @@ class User(Base):
 
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, default= lambda: str(uuid.uuid4()), primary_key=True)
     name = Column(String, nullable=False, unique=True)
     password = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
