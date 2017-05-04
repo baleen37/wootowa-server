@@ -21,9 +21,11 @@ class UserController(object):
         return user
 
     def verify_user(self, name, password):
-        user = (db.query(User)
-                .filter(User.name==name)
-                .first())
+        hash_pw = User.new_password(password)
 
-        return user.verify_password(password)
+        q = (db.query(User)
+             .filter(User.name==name)
+             .filter(User.password==hash_pw))
+
+        return db.query(q.exists()).scalar()
 
