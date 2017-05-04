@@ -3,6 +3,7 @@ from .storage import db_session as db
 
 class UserController(object):
 
+    @classmethod
     def create_user(self, form):
         user = User()
         user.name = form.get('name') 
@@ -13,6 +14,7 @@ class UserController(object):
 
         return user
 
+    @classmethod
     def get_user(self, name):
         user = (db.query(User)
                 .filter(User.name==name)
@@ -20,6 +22,7 @@ class UserController(object):
 
         return user
 
+    @classmethod
     def verify_user(self, name, password):
         hash_pw = User.new_password(password)
 

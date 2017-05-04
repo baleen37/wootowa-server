@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 import functools
 import flask_socketio as sio
-import flask as fl
-from flask import Flask, render_template, session, request
+from flask import (
+    Flask, render_template, session, request,
+    jsonify, make_response
+)
 from .storage import init_session, db_session
 from .helpers.socket import SocketManager
+
 from glb import config
 
-from .models import *
+from .models import User
 from .activity import UserController
 from .storage import db_session 
 from .helpers.apicode import ApiCode
@@ -23,11 +26,37 @@ socketio = sio.SocketIO(app,
                         ping_interval=1)
 init_session(app)
 
-def login_required(f):
+def requires_auth(f):
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
+        header = request.headers.get('Authorization')
+        if header:
+            _, token = header.split()
+            resp = User.decode_auth_token(token)
+
+            if isinstance(resp, Exception):
+                return make_response(jsonify({
+                    'msg': 'Required auth token',
+                    'code': ApiCode.Failure.value
+                })), 401
+
+            request.user_id = resp
+        else:
+            return make_response(jsonify({
+                'msg': 'Required auth token',
+                'code': ApiCode.Failure.value
+            })), 401
+
         return f(*args, **kwargs)
     return wrapped
+
+@app.route('/v1/test', methods=['POST'])
+@requires_auth
+def api_test():
+    return make_response(jsonify({
+        'msg': request.user_id,
+        'code': ApiCode.Success.value
+    })), 201
 
 @app.route('/v1/user/sign_in', methods=['POST'])
 def sign_in():
@@ -35,27 +64,34 @@ def sign_in():
     name = user_dict['name']
     pw = user_dict['password']
 
-    result = UserController().verify_user(name, pw)
+    result = UserController.verify_user(name, pw)
+
     if result:
-        return fl.jsonify({
-            'msg': 'success',
-            'code': ApiCode.Success.value
-        })
+        user = UserController.get_user(name)
+
+        auth_token = user.encode_auth_token()
+        responseObject = {
+            'auth_token': auth_token.decode()
+        }
+        return make_response(jsonify({
+                'data': responseObject,
+                'msg': 'success',
+                'code': ApiCode.Success.value
+            })), 201
     else:
-        return fl.jsonify({
-            'msg': '실패',
+        return make_response(jsonify({
+            'msg': 'failure',
             'code': ApiCode.Failure.value
-        })
+        })), 401
 
 @app.route('/v1/user/sign_up', methods=['POST'])
 def sign_up():
     user_dict = request.form.to_dict()
     UserController().create_user(user_dict)
-
-    return fl.jsonify({
+    return make_response(jsonify({
         'msg': 'success',
-        'code': ApiCode.Success.value
-    })
+        'code': ApiCode.Failure.value
+    })), 201
 
 @socketio.on('connect')
 def connect():
