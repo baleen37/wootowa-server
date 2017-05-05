@@ -61,7 +61,7 @@ def requires_auth(f):
 @app.route('/streams.json', methods=['GET'])
 def streams():
     streams = []
-    for awaiter in manager.get_clients():
+    for awaiter in manager.get_awaiter_list():
         streams.append({'name': awaiter, 'id': awaiter})
     return make_response(jsonify(streams)), 200
 
@@ -157,7 +157,7 @@ def message(message):
     print('message() : {}'.format(message))
     to = message.get('to', None)
 
-    if not to in manager.get_awaiter_list():
+    if not to in manager.get_clients():
         return
 
     message.pop('to')
