@@ -24,8 +24,8 @@ app.config.from_object(config)
 manager = SocketManager()
 socketio = sio.SocketIO(app, 
                         client_manager=manager,
-                        ping_timeout=20,
-                        ping_interval=10)
+                        ping_timeout=10,
+                        ping_interval=1)
 init_session(app)
 
 def requires_auth(f):
