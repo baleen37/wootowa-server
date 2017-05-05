@@ -156,9 +156,10 @@ def findRoom(data):
 def message(message):
     print('message() : {}'.format(message))
     to = message.get('to', None)
-    #if not to in manager.get_awaiter_list():
-    if not to in manager.get_clients():
+
+    if not to in manager.get_awaiter_list():
         return
+
     message.pop('to')
     message['from'] = request.sid
 
