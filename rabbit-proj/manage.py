@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     command = sys.argv[1]
     if command == 'runserver':
-        socketio.run(app, host='0.0.0.0', port=3000, debug=True)
+        socketio.run(app, host='0.0.0.0', port=5000, debug=True)
 
     if command == 'initdb':
         init_db()

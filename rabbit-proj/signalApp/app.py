@@ -72,39 +72,23 @@ def api_test():
         'msg': request.uid, 'code': ApiCode.Success.value
     })), 201
 
-@app.route('/v1/user/sign_in', methods=['POST'])
-def sign_in():
-    user_dict = request.form.to_dict()
-    name = user_dict['name']
-    pw = user_dict['password']
-
-    result = UserController.verify_user(name, pw)
-
-    if result:
-        user = UserController.get_user(name)
-
-        auth_token = user.encode_auth_token()
-        responseObject = {
-            'auth_token': auth_token.decode()
-        }
-        return make_response(jsonify({
-                'data': responseObject,
-                'msg': 'success',
-                'code': ApiCode.Success.value
-            })), 201
-    else:
-        return make_response(jsonify({
-            'msg': 'failure',
-            'code': ApiCode.Failure.value
-        })), 401
-
 @app.route('/v1/user/sign_up', methods=['POST'])
 def sign_up():
     user_dict = request.form.to_dict()
-    UserController().create_user(user_dict)
+    user_dict.update({'device_id': request.headers.get('Device-Id')})
+
+    uc = UserController()
+    user = uc.get_or_create_user(user_dict)
+
+    auth_token = user.encode_auth_token()
+    response_obj = {
+        'auth_token': auth_token.decode()
+    }
+    
     return make_response(jsonify({
         'msg': 'success',
-        'code': ApiCode.Failure.value
+        'data': response_obj,
+        'code': ApiCode.Success.value
     })), 201
 
 @socketio.on('connect')
