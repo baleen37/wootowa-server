@@ -65,6 +65,10 @@ def streams():
         streams.append({'name': awaiter, 'id': awaiter})
     return make_response(jsonify(streams)), 200
 
+@app.route('/privacy', methods=['GET'])
+def privacy():
+    return render_template('privacy.html')
+
 @app.route('/v1/test', methods=['POST'])
 @requires_auth
 def api_test():
