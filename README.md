@@ -1,4 +1,4 @@
-# rabbit-server
+# wootowa-server
 
 
 ## Get started
