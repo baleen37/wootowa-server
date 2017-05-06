@@ -118,9 +118,9 @@ def answer(data):
 def candidate(data):
     print('candidate {}'.format(data))
 
-@socketio.on('readyToStream')
-def ready_to_stream(data):
-    print('ready_to_stream {}'.format(data))
+@socketio.on('join')
+def join(data):
+    print('join {}'.format(data))
     manager.add_awaiter(request.sid)
 
     for awaiter in manager.get_awaiter_list():

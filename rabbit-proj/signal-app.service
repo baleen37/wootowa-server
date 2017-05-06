@@ -5,7 +5,7 @@ After=network.target
 [Service]
 WorkingDirectory=/home/ubuntu/rabbit-server/rabbit-proj
 Environment="PATH=/home/ubuntu/rabbit-server/rabbit-proj/.venv/bin"
-ExecStart=uwsgi --http :5000 --gevent 1000 --http-websockets --master --wsgi-file manage.py --callable app
+ExecStart=/home/ubuntu/rabbit-server/rabbit-proj/.venv/bin/uwsgi --http :5000 --gevent 1000 --http-websockets --master --wsgi-file manage.py --callable app
 
 [Install]
 WantedBy=multi-user.target
