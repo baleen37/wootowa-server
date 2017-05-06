@@ -153,6 +153,7 @@ def message(message):
 @socketio.on('leave')
 def leave():
     print('leave')
+    manager.remove_awaiter(request.sid)
 
 @socketio.on('ping')
 def ping():
