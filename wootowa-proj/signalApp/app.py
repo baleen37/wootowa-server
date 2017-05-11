@@ -58,12 +58,14 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return wrapped
 
-@app.route('/streams.json', methods=['GET'])
-def streams():
-    streams = []
-    for awaiter in manager.get_awaiter_list():
-        streams.append({'name': awaiter, 'id': awaiter})
-    return make_response(jsonify(streams)), 200
+@app.route('/state', methods=['GET'])
+def state():
+    kw = {
+        'clients': manager.get_clients(),
+        'awaiters': manager.get_awaiter_list(),
+        'sid_dict': manager.sid_dict,
+    }
+    return make_response(jsonify(kw)), 200
 
 @app.route('/privacy', methods=['GET'])
 def privacy():
@@ -73,7 +75,8 @@ def privacy():
 @requires_auth
 def api_test():
     return make_response(jsonify({
-        'msg': request.uid, 'code': ApiCode.Success.value
+        'msg': request.uid, 
+        'code': ApiCode.Success.value
     })), 201
 
 @app.route('/v1/user/sign_up', methods=['POST'])
@@ -96,15 +99,16 @@ def sign_up():
     })), 201
 
 @socketio.on('connect')
-#@requires_auth
+@requires_auth
 def connect():
     sio.emit('id', request.sid)
+    manager.add_uid(request.sid, request.uid)
     print('connect client_id {}'.format(request.sid))
 
 @socketio.on('disconnect')
 def disconnect():
     print('Client disconnected')
-    manager.remove_awaiter(request.sid)
+    manager.clear(request.sid)
 
 @socketio.on('init')
 def init(data):
