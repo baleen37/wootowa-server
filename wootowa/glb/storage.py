@@ -1,8 +1,7 @@
-from sqlalchemy import Table, MetaData, create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker, create_session
 from redis import BlockingConnectionPool, StrictRedis
-from .session import RedisSessionInterface
-from glb import config
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from wootowa.glb import config
 
 metaData = MetaData()
 
@@ -19,13 +18,11 @@ db_session = scoped_session(
     )
 )
 
-def init_session(app):
-    interface = RedisSessionInterface(get_redis())
-    app.session_interface = interface
 
 def get_redis():
     return StrictRedis(connection_pool=session_redis_pool)
 
+
 def init_db():
-    from . import models
+    from wootowa.glb.model.user import User
     models.Base.metadata.create_all(bind=engine)

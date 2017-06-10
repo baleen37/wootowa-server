@@ -90,3 +90,7 @@ ENV/
 .ropeproject
 
 config.py
+*.iml
+
+.idea
+.idea/
