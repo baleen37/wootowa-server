@@ -6,7 +6,7 @@ from wootowa.glb import config
 async_mode = None
 
 # WSGI server
-mgr = socketio.RedisManager(config.REDIS_URI)
+# mgr = socketio.RedisManager(config.REDIS_URI)
 sio = socketio.Server(async_mode=async_mode)
 app = Flask(__name__)
 app.wsgi_app = socketio.Middleware(sio, app.wsgi_app)
