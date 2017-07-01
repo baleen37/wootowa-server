@@ -1,16 +1,11 @@
 from flask import Flask
+import sys
+print('web/app')
 
-from wootowa.web.helpers.dynamic_blueprints import register_blueprints
+
+from wootowa.web.views import register_bp
 
 app = Flask(__name__)
 app.config.from_object('wootowa.glb.config.Config')
 
-INSTALLED_BLUEPRINTS = [
-    'web.api.v1.user',
-]
-
-register_blueprints(app, INSTALLED_BLUEPRINTS, "bp")
-
-
-def run():
-    app.run(port=5555)
+register_bp(app)

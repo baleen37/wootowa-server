@@ -3,8 +3,8 @@ import datetime
 import jwt
 
 from wootowa.glb import config
+from wootowa.glb.database import db_session as db
 from wootowa.glb.model.user import User
-from wootowa.glb.storage import db_session as db
 
 
 class UserController(object):

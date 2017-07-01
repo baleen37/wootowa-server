@@ -7,7 +7,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.sql import func
 
-from wootowa.glb.model.base import Base
+from wootowa.glb.database import Base
 
 
 class User(Base):

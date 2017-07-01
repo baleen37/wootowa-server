@@ -1,8 +1,6 @@
 import socketio
 from flask import Flask, render_template
 
-from wootowa.glb import config
-
 async_mode = None
 
 # WSGI server
