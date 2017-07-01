@@ -6,7 +6,7 @@ from wootowa.glb.config import Config
 
 metaData = MetaData()
 
-engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
+engine = create_engine(Config.DATABASE_URI)
 
 db_session = scoped_session(
     sessionmaker(

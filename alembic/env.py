@@ -14,7 +14,7 @@ from sqlalchemy import engine_from_config, pool
 config = context.config
 from wootowa.glb.config import Config
 
-config.set_main_option('sqlalchemy.url', Config.SQLALCHEMY_DATABASE_URI)
+config.set_main_option('sqlalchemy.url', Config.DATABASE_URI)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
