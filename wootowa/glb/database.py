@@ -20,5 +20,7 @@ Base = declarative_base()
 
 
 def init_db():
-    from wootowa.glb.models.user import User, Device
+    from wootowa.glb.models.user import (
+        User
+    )
     Base.metadata.create_all(bind=engine)

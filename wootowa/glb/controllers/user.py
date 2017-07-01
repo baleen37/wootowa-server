@@ -2,52 +2,44 @@ import datetime
 
 import jwt
 
-from wootowa.glb import config
+from wootowa.glb.config import Config
 from wootowa.glb.database import db_session as db
 from wootowa.glb.models.user import User
 
 
 class UserController(object):
-    @classmethod
-    def get_or_create_user(cls, social_id):
-        user = cls.get_user(social_id)
+    def __init__(self, user: User):
+        assert user, 'user is none'
+        self.user = user
 
-        if not user:
-            user = User()
-            user.social_id = social_id
+    @classmethod
+    def create(cls, social_user_id: str, nickname: str, gender: User.Gender, age: int):
+        user = User()
+        user.social_user_id = social_user_id
+        user.nickname = nickname
+        user.gender = gender
+        user.age = age
 
         db.add(user)
         db.commit()
 
         return user
 
-    @classmethod
-    def get_user(cls, social_id=str):
-        user = (db.query(User)
-                .filter(User.social_id == social_id)
-                .first())
-
-        return user
-
-    @staticmethod
-    def encode_auth_token(user_id):
+    def encode_auth_token(self) -> str:
         """
         Generates the Auth Token
         :return: string
         """
-        try:
-            payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30),
-                'iat': datetime.datetime.utcnow(),
-                'sub': user_id
-            }
-            return jwt.encode(
-                payload,
-                config.SECRET_KEY,
-                algorithm='HS256'
-            )
-        except Exception as e:
-            return e
+        payload = {
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30),
+            'iat': datetime.datetime.utcnow(),
+            'sub': self.user.id
+        }
+        return jwt.encode(
+            payload,
+            Config.SECRET_KEY,
+            algorithm='HS256'
+        )
 
     @staticmethod
     def decode_auth_token(auth_token):
@@ -57,7 +49,7 @@ class UserController(object):
         :return: integer|string
         """
         try:
-            payload = jwt.decode(auth_token, config.SECRET_KEY)
+            payload = jwt.decode(auth_token, Config.SECRET_KEY)
             return payload['sub']
         except jwt.ExpiredSignatureError:
             return 'Signature expired. Please log in again.'
