@@ -22,8 +22,6 @@ class User(Base):
     nickname = Column(String)
     gender = Column(Enum(Gender))
     age = Column(Integer)
-    age2 = Column(Integer)
-    age3 = Column(Integer)
     until_block_at = Column(DateTime)
     created_at = Column(DateTime, server_default=func.now())
 
@@ -36,5 +34,4 @@ class Device(Base):
 
     id = Column(String, nullable=False, primary_key=True)
     push_token = Column(String, nullable=True, unique=True)
-    push_token2 = Column(String, nullable=True, unique=True)
     created_at = Column(DateTime, server_default=func.now())
