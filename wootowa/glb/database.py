@@ -23,4 +23,5 @@ def init_db():
     from wootowa.glb.models.user import (
         User
     )
+    User
     Base.metadata.create_all(bind=engine)
