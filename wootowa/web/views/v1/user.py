@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template
 from oauth2client import client, crypt
 
 from wootowa.glb.config import Config
@@ -12,7 +12,7 @@ bp = Blueprint('user', __name__, url_prefix="/api/v1/user")
 
 @bp.route("/")
 def index():
-    return "user", 200
+    return render_template('test.html')
 
 
 @bp.route('<user_id>')
