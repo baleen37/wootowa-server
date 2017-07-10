@@ -45,5 +45,5 @@ class Cookie(Base):
     __tablename__ = 'wootowa_cookies'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    cookie = sa.Column(sa.String, nullable=False)
+    cookie = sa.Column(sa.String, nullable=False, unique=True)
     created_at = sa.Column(sa.DateTime, nullable=False, server_default=func.now())
