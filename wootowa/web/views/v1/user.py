@@ -1,5 +1,6 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request
 from oauth2client import client, crypt
+from werkzeug.exceptions import abort
 
 from wootowa.glb.config import Config
 from wootowa.glb.controllers.socialuser import SocialUserController
@@ -18,7 +19,8 @@ def index():
     cookie.cookie = data
     db_session.add(cookie)
     db_session.commit()
-    return render_template('test.html')
+
+    return abort(404)
 
 
 @bp.route('<user_id>')
