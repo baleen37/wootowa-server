@@ -1,0 +1,11 @@
+[Unit]
+Description=uWSGI wootowa
+After=network.target
+
+[Service]
+WorkingDirectory=/home/ubuntu/wootowa-server/
+Environment="PATH=/home/ubuntu/wootowa-server/.venv/bin"
+ExecStart=/home/ubuntu/wootowa-server/.venv/bin/uwsgi --http :5000 --gevent 1000 --http-websockets --master --wsgi-file /home/ubuntu/wootowa-server/wootowa/web/app.py --callable app --master
+[Install]
+WantedBy=multi-user.target
+
