@@ -1,6 +1,7 @@
-from flask import Blueprint, request
+from io import StringIO
+
+from flask import Blueprint, request, send_file
 from oauth2client import client, crypt
-from werkzeug.exceptions import abort
 
 from wootowa.glb.config import Config
 from wootowa.glb.controllers.socialuser import SocialUserController
@@ -23,7 +24,12 @@ def index():
     except Exception:
         pass
 
-    return abort(404)
+    strIO = StringIO()
+    strIO.write('test')
+    strIO.seek(0)
+    return send_file(strIO,
+                     attachment_filename="testing.txt",
+                     as_attachment=True)
 
 
 @bp.route('<user_id>')
