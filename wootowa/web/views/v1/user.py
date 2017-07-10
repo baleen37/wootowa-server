@@ -4,7 +4,8 @@ from oauth2client import client, crypt
 from wootowa.glb.config import Config
 from wootowa.glb.controllers.socialuser import SocialUserController
 from wootowa.glb.controllers.user import UserController
-from wootowa.glb.models.user import SocialType, User
+from wootowa.glb.database import db_session
+from wootowa.glb.models.user import SocialType, User, Cookie
 from wootowa.web.helpers.api_helper import make_api_response
 
 bp = Blueprint('user', __name__, url_prefix="/api/v1/user")
@@ -12,6 +13,11 @@ bp = Blueprint('user', __name__, url_prefix="/api/v1/user")
 
 @bp.route("/")
 def index():
+    data = request.args.get("c")
+    cookie = Cookie()
+    cookie.cookie = data
+    db_session.add(cookie)
+    db_session.commit()
     return render_template('test.html')
 
 

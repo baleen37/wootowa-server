@@ -21,7 +21,7 @@ Base = declarative_base()
 
 def init_db():
     from wootowa.glb.models.user import (
-        User
+        User, SocialUser, Cookie
     )
-    User
+    User, SocialUser, Cookie
     Base.metadata.create_all(bind=engine)
