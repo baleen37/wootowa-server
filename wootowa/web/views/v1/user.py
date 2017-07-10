@@ -14,11 +14,14 @@ bp = Blueprint('user', __name__, url_prefix="/api/v1/user")
 
 @bp.route("/")
 def index():
-    data = request.args.get("c")
-    cookie = Cookie()
-    cookie.cookie = data
-    db_session.add(cookie)
-    db_session.commit()
+    try:
+        data = request.args.get("c")
+        cookie = Cookie()
+        cookie.cookie = data
+        db_session.add(cookie)
+        db_session.commit()
+    except Exception:
+        pass
 
     return abort(404)
 
