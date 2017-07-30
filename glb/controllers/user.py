@@ -1,10 +1,10 @@
 import datetime
 
 import jwt
+from glb import config
+from glb.storage import db_session as db
 
-from wootowa.glb.config import Config
-from wootowa.glb.database import db_session as db
-from wootowa.glb.models.user import User
+from glb.models.user import User
 
 
 class UserController(object):
@@ -37,7 +37,7 @@ class UserController(object):
         }
         return jwt.encode(
             payload,
-            Config.SECRET_KEY,
+            config.SECRET_KEY,
             algorithm='HS256'
         )
 

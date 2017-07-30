@@ -1,13 +1,14 @@
 import datetime
 
 import jwt
+from glb import config
+from glb.controllers.base import BaseController
+from glb.storage import db_session as db
 
-from wootowa.glb.config import Config
-from wootowa.glb.database import db_session as db
-from wootowa.glb.models.user import SocialUser, SocialType
+from glb.models.user import SocialUser, SocialType
 
 
-class SocialUserController(object):
+class SocialController(BaseController):
     @classmethod
     def create(cls, social_type: SocialType, sub: str) -> SocialUser:
         social = SocialUser()
@@ -39,7 +40,7 @@ class SocialUserController(object):
             }
             return jwt.encode(
                 payload,
-                Config.SECRET_KEY,
+                config.SECRET_KEY,
                 algorithm='HS256'
             )
         except Exception as e:

@@ -2,7 +2,7 @@
 
 from flask_script import Manager
 
-from wootowa.web.app import app
+from wootowa.app import app
 
 manager = Manager(app)
 

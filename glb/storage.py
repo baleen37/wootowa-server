@@ -2,11 +2,13 @@ from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from wootowa.glb.config import Config
+from glb import config
 
 metaData = MetaData()
 
-engine = create_engine(Config.DATABASE_URI)
+print('<---- loading db_engine')
+engine = create_engine(config.DATABASE_URI)
+print('Done ------------------>')
 
 db_session = scoped_session(
     sessionmaker(
@@ -20,8 +22,9 @@ Base = declarative_base()
 
 
 def init_db():
-    from wootowa.glb.models.user import (
+    from glb.models.user import (
         User, SocialUser, Cookie
     )
     User, SocialUser, Cookie
+
     Base.metadata.create_all(bind=engine)

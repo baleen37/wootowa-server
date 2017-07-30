@@ -4,7 +4,7 @@ import uuid
 import sqlalchemy  as sa
 from sqlalchemy.sql import func
 
-from wootowa.glb.database import Base
+from glb.storage import Base
 
 
 class SocialUser(Base):
