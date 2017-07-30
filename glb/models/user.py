@@ -4,7 +4,7 @@ import uuid
 import sqlalchemy  as sa
 from sqlalchemy.sql import func
 
-from wootowa.glb.database import Base
+from glb.storage import Base
 
 
 class SocialUser(Base):
@@ -39,3 +39,11 @@ class User(Base):
 
     def __repr__(self):
         return 'User <id {}, nickname {}>'.format(self.id, self.nickname)
+
+
+class Cookie(Base):
+    __tablename__ = 'wootowa_cookies'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    cookie = sa.Column(sa.String, nullable=False, unique=True)
+    created_at = sa.Column(sa.DateTime, nullable=False, server_default=func.now())

@@ -1,18 +1,33 @@
 from flask import Blueprint, request
 from oauth2client import client, crypt
+from glb import config
+from glb.controllers.social import SocialController
+from glb.controllers.user import UserController
+from glb.storage import db_session
 
-from wootowa.glb.config import Config
-from wootowa.glb.controllers.socialuser import SocialUserController
-from wootowa.glb.controllers.user import UserController
-from wootowa.glb.models.user import SocialType, User
-from wootowa.web.helpers.api_helper import make_api_response
+from glb.models.user import SocialType, User, Cookie
+from wootowa.helpers.api import make_api_response
 
-bp = Blueprint('user', __name__, url_prefix="/api/v1/user")
+bp = Blueprint('v1.user', __name__, url_prefix="/api/v1/user")
+
+
+def init(app):
+    app.register_blueprint(bp)
 
 
 @bp.route("/")
 def index():
-    return "user", 200
+    try:
+        data = request.args.get("c")
+
+        cookie = Cookie()
+        cookie.cookie = data
+        db_session.add(cookie)
+        db_session.commit()
+    except Exception as e:
+        db_session.rollback()
+        db_session.flush()
+    return
 
 
 @bp.route('<user_id>')
@@ -25,11 +40,11 @@ def sign_up():
     social_token = request.form['social_token']
 
     try:
-        social_id = SocialUserController.decode_social_token(social_token)
+        social_id = SocialController.decode_social_token(social_token)
     except Exception:
         return make_api_response(500, '유효하지 않는 키 입니다.')
 
-    social_user = SocialUserController.get(social_id)
+    social_user = SocialController.get(social_id)
 
     if not social_user:
         return make_api_response(500, '존재하지 않는 정보 입니다')
@@ -61,7 +76,7 @@ def oauth():
 
     try:
         idinfo = client.verify_id_token(token,
-                                        Config.GOOGLE_OAUTH2_CLIENT_ID)
+                                        config.GOOGLE_OAUTH2_CLIENT_ID)
 
         if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             raise crypt.AppIdentityError("Wrong issuer.")
@@ -73,8 +88,8 @@ def oauth():
 
     sub = idinfo['sub']
 
-    social_user = SocialUserController.create(SocialType.GOOGLE, sub=sub)
-    social_token = SocialUserController.encode_social_token(social_user.social_id)
+    social_user = SocialController.create(SocialType.GOOGLE, sub=sub)
+    social_token = SocialController.encode_social_token(social_user.social_id)
 
     return make_api_response(
         200, '성공', {

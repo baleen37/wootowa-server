@@ -12,9 +12,9 @@ from sqlalchemy import engine_from_config, pool
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-from wootowa.glb.config import Config
+from glb import config
 
-config.set_main_option('sqlalchemy.url', Config.DATABASE_URI)
+config.set_main_option('sqlalchemy.url', config.DATABASE_URI)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -26,7 +26,7 @@ fileConfig(config.config_file_name)
 
 def combine_metadata():
     from sqlalchemy import MetaData
-    from wootowa.glb import models
+    from glb import models
 
     model_classes = []
     for model_name in models.__all__:
@@ -40,7 +40,7 @@ def combine_metadata():
     return m
 
 
-from wootowa.glb.database import Base, init_db
+from glb.storage import Base, init_db
 
 target_metadata = Base.metadata
 init_db()
