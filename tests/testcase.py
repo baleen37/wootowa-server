@@ -1,16 +1,15 @@
 import unittest
-
-from wootowa.storage import db_session
+from wootowa.app import create_app, get_config
+from wootowa.storage import dal
 
 
 class BaseTestCase(unittest.TestCase):
-    pass
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        config_obj = get_config('wootowa.config.Testing')
 
-class ApiViewTestCase(BaseTestCase):
-    def setUp(self):
-        super().setUp()
-        db_session.drop_all()
-
-    def tearDown(self):
-        super().tearDown()
+        cls.app = create_app(config_obj)
+        dal.db_init(config_obj.SQLALCHEMY_DATABASE_URI)
+        cls.client = cls.app.test_client()

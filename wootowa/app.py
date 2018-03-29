@@ -1,24 +1,51 @@
-import importlib
+import os
+from importlib import import_module
 
-from flask import Flask
+import flask as fl
+import yaml
+from werkzeug.utils import cached_property
 
-app = Flask(__name__)
-app.config.from_object('wootowa.config')
+from .blueprints import all_blueprints
 
-
-def init_blueprint(app):
-    from wootowa.apis import v1 as v1_views
-    # api/v1
-    for module in v1_views.__all__:
-        # (package).apis.(module)을 임포트하고 init 함수를 호출
-        importlib.import_module('wootowa.apis.v1.' + module, package=__name__).init(app)
-
-    # init context processor
-    from wootowa import context_processor
-    context_processor.init(app)
+APP_ROOT_FOLDER = os.path.dirname(__file__)
 
 
-init_blueprint(app)
+def get_config(config_class_string, yaml_files=None):
+    config_module, config_class = config_class_string.rsplit('.', 1)
+    config_class_object = getattr(import_module(config_module), config_class)
+    config_obj = config_class_object()
 
-from wootowa.storage import import_models
-import_models()
+    yaml_files = yaml_files or [f for f in [
+        os.path.abspath(os.path.join(APP_ROOT_FOLDER, '..', 'config.yml')),
+        os.path.join(APP_ROOT_FOLDER, 'config.yml')
+    ] if os.path.exists(f)]
+
+    additional_dict = dict()
+    for y in yaml_files:
+        with open(y) as f:
+            additional_dict.update(
+                yaml.load(f.read())
+            )
+
+    for key, value in additional_dict.items():
+        setattr(config_obj, key, value)
+
+    return config_obj
+
+
+class Response(fl.Response):
+    @cached_property
+    def json(self):
+        return fl.json.loads(self.data)
+
+
+def create_app(config_obj):
+    app = fl.Flask(__name__)
+    app.config.from_object(config_obj)
+    app.response_class = Response
+
+    for bp in all_blueprints:
+        import_module(bp.import_name)
+        app.register_blueprint(bp)
+
+    return app

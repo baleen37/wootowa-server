@@ -1,40 +1,19 @@
-from wootowa.models.base import Base
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-from wootowa import config
-from wootowa.utils import sysutil
-
-metaData = MetaData()
-
-print('<---- loading db_engine')
-if sysutil.is_unittest():
-    print('------- unit test engine -----')
-
-    engine = create_engine("sqlite:///memory")
-else:
-    engine = create_engine(config.DATABASE_URI)
-print('Done ------------------>')
-
-db_session = scoped_session(
-    sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=engine
-    )
-)
+import sqlalchemy as sa
+from sqlalchemy import MetaData
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 
-def init_db():
-    import_models()
-    Base.metadata.create_all(bind=engine)
+class DataAccessLayer:
+    engine = None
+    conn_string = None
+    session = None
+    metadata = MetaData()
+
+    def db_init(self, conn_string):
+        self.engine = sa.create_engine(conn_string)
+        self.metadata.create_all(self.engine)
+        self.conn_string = conn_string
+        self.session = scoped_session(sessionmaker(bind=self.engine))
 
 
-def drop_db():
-    import_models()
-    Base.metadata.drop_all(bind=engine)
-
-
-def import_models():
-    from wootowa import models
-    print(f'import_models {models}')
+dal = DataAccessLayer()

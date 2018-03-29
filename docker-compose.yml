@@ -1,0 +1,11 @@
+version: '3'
+services:
+  db:
+    image: postgres:10.3
+    restart: always
+    environment:
+      POSTGRES_USER: wootowa
+      POSTGRES_PASSWORD: wootowa
+      POSTGRES_DB: wootowa
+    ports:
+      - "5432:5432"

@@ -1,41 +1,32 @@
-import enum
-import uuid
+import hashlib, uuid
+import datetime
+import sqlalchemy as sa
 
-import sqlalchemy  as sa
-from sqlalchemy.sql import func
-
-from wootowa.models.base import Base
+from . import Model
 
 
-class SocialUser(Base):
-    __tablename__ = 'wootowa_socials'
+class PasswordMixin:
+    _encrypted_password = sa.Column(sa.String(60), nullable=False)
+    _encrypted_password_salt = sa.Column(sa.String(60), nullable=False)
+
+    @property
+    def password(self):
+        return self._encrypted_password
+
+    @password.setter
+    def password(self, value):
+        self._encrypted_password_salt = uuid.uuid4().hex
+        self._encrypted_password = hashlib.sha512(value + self._encrypted_password_salt).hexdigest()
+
+    def check_password(self, value):
+        return hashlib.sha512(value + self._encrypted_password_salt).hexdigest() == self._encrypted_password
+
+
+class User(PasswordMixin, Model):
+    __tablename__ = 'users'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    social_id = sa.Column(sa.String, nullable=False, unique=True)
-    created_at = sa.Column(sa.DateTime, nullable=False, server_default=func.now())
+    username = sa.Column(sa.Unicode(50), unique=True)
+    nickname = sa.Column(sa.Unicode(50), nullable=False)
 
-    def __repr__(self):
-        return 'SocialUser <id {}, social_id {}>'.format(self.id, self.social_id)
-
-
-class SocialType(enum.Enum):
-    GOOGLE = 'google'
-
-
-class User(Base):
-    __tablename__ = 'wootowa_users'
-
-    class Gender(enum.Enum):
-        male = "M"
-        female = "F"
-
-    id = sa.Column(sa.String, default=lambda: str(uuid.uuid4()), primary_key=True)
-    social_user_id = sa.Column(sa.Integer, sa.ForeignKey(SocialUser.id), nullable=False, unique=True)
-    nickname = sa.Column(sa.String, nullable=False)
-    gender = sa.Column(sa.Enum(Gender), nullable=False)
-    age = sa.Column(sa.Integer, nullable=False)
-    until_block_at = sa.Column(sa.DateTime, nullable=True)
-    created_at = sa.Column(sa.DateTime, nullable=False, server_default=func.now())
-
-    def __repr__(self):
-        return 'User <id {}, nickname {}>'.format(self.id, self.nickname)
+    created_at = sa.Column(sa.DateTime, default=datetime.datetime.utcnow)

@@ -1,7 +1,12 @@
-import wootowa.models.base
-import wootowa.models.user
+from sqlalchemy.ext.declarative import declarative_base
 
-__all__ = [
-    'base',
-    'user',
-]
+
+class Model:
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+Model = declarative_base(cls=Model)
+
+from .user import *
